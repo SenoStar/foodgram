@@ -285,8 +285,6 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
 
         response = Response(shopping_list, content_type='text/plain')
         response['Content-Disposition'] = (
-            f'attachment; '
-            f'filename='
-            f'"{user}_shopping_list.txt"'
+            f'attachment; filename="{user}_shopping_list.txt"'
         )
         return response
