@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'key')
 
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.getenv('DEBUG', True)
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1;localhost').split(';')
 
@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'django_filters',
     'api',
     'recipes'
 ]
@@ -93,7 +94,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -114,18 +115,31 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    # 'DEFAULT_PAGINATION_CLASS': 'api.paginations.PageSizeLimitPagination'
+    'DEFAULT_PAGINATION_CLASS': 'api.pagination.CustomPagination'
 }
 
 DJOSER = {
-    # 'LOGIN_FIELD': 'email',
+    'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
     'SERIALIZERS': {
         'user_create': 'api.serializers.CustomUserCreateSerializer',
-        'user': 'api.serializers.CustomUserGetSerializer',
-        'current_user': 'api.serializers.CustomUserGetSerializer'
+        'user': 'api.serializers.CustomUserGetSerializer'
     },
     'PERMISSIONS': {
-        'user_list': ['rest_framework.permissions.AllowAny'],
         'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+        'activation': ['rest_framework.permissions.IsAdminUser'],
+        'resend_activation': ['rest_framework.permissions.IsAdminUser'],
+        'reset_password': ['rest_framework.permissions.IsAdminUser'],
+        'reset_password_confirm': ['rest_framework.permissions.IsAdminUser'],
+        'set_username': ['rest_framework.permissions.IsAdminUser'],
+        'reset_username': ['rest_framework.permissions.IsAdminUser'],
+        'reset_username_confirm': ['rest_framework.permissions.IsAdminUser'],
+        'user_delete': ['rest_framework.permissions.IsAdminUser'],
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    'api.backends.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend'
+]

@@ -1,0 +1,50 @@
+version: '3.3'
+
+volumes:
+  static:
+  media:
+  pg_data:
+
+services:
+  db:
+    container_name: foodgram-db
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  frontend:
+    container_name: foodgram-frontend
+    build: ./frontend
+    volumes:
+      - static:/app/frontend_static
+    command: cp -r /app/build/. /app/frontend_static
+
+  backend:
+    container_name: foodgram-backend
+    build: ./backend/
+    env_file: .env
+    depends_on:
+      - db
+    volumes:
+      - static:/app/web
+      - media:/app/media
+    command: >
+      /bin/bash -c "
+        python manage.py collectstatic --noinput
+        cp -r /app/static/. web/static &&
+        python manage.py migrate &&
+        echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')\" | python manage.py shell &&
+        gunicorn --bind 0.0.0.0:8000 backend_foodgram.wsgi
+        python manage.py load_csv
+      "
+
+  nginx:
+    container_name: foodgram-gateway
+    build: ./gateway
+    env_file: .env
+    volumes:
+      - static:/web
+      - media:/web/media
+    ports:
+      - "8000:80"

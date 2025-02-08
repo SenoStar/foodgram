@@ -1,0 +1,36 @@
+version: '3.3'
+
+volumes:
+  static:
+  pg_data:
+  media:
+
+services:
+  db:
+    image: postgres:13.10
+    env_file: .env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+  backend:
+    env_file: .env
+    image: seno404star/backend_foodgram
+    volumes:
+      - static:/app/web
+      - media:/app/media
+    depends_on:
+      - db
+  frontend:
+    env_file: .env
+    image: seno404star/frontend_foodgram
+    command: cp -r /app/build/. /frontend_static/
+    volumes:
+      - static:/app/frontend_static
+  gateway:
+    env_file: .env
+    image: seno404star/gateway_foodgram
+    volumes:
+      - static:/web
+      - media:/web/media
+    ports:
+      - 8000:80
+    restart: always
