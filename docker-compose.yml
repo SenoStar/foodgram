@@ -39,7 +39,7 @@ services:
         python manage.py load_csv
       "
 
-  nginx:
+  gateway:
     container_name: foodgram-gateway
     build: ./gateway
     env_file: .env

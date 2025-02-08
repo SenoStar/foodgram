@@ -20,7 +20,15 @@ services:
     depends_on:
       - frontend
       - db
-    restart: always
+    command: >
+      /bin/bash -c "
+        python manage.py collectstatic --noinput
+        cp -r /app/static/. web/static &&
+        python manage.py migrate &&
+        echo \"from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('$ADMIN_USERNAME', '$ADMIN_EMAIL', '$ADMIN_PASSWORD')\" | python manage.py shell &&
+        gunicorn --bind 0.0.0.0:8000 backend_foodgram.wsgi
+        python manage.py load_csv
+      "
   frontend:
     env_file: .env
     image: seno404star/frontend_foodgram
@@ -35,4 +43,3 @@ services:
       - media:/web/media
     ports:
       - 8000:80
-    restart: always
