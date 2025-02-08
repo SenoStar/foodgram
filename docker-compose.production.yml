@@ -32,5 +32,5 @@ services:
       - static:/web
       - media:/web/media
     ports:
-      - 8000:80
+      - 8001:80
     restart: always
