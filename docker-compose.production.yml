@@ -18,7 +18,9 @@ services:
       - static:/app/web
       - media:/app/media
     depends_on:
+      - frontend
       - db
+    restart: always
   frontend:
     env_file: .env
     image: seno404star/frontend_foodgram
