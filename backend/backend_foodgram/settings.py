@@ -143,3 +143,5 @@ AUTHENTICATION_BACKENDS = [
     'api.backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend'
 ]
+
+CSRF_TRUSTED_ORIGINS = ['*']
