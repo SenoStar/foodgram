@@ -7,18 +7,25 @@ volumes:
 
 services:
   db:
+    container_name: foodgram-db
     image: postgres:13.10
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+  frontend:
+    container_name: foodgram-frontend
+    image: seno404star/frontend_foodgram
+    command: cp -r /app/build/. /app/frontend_static/
+    volumes:
+      - static:/app/frontend_static
   backend:
+    container_name: foodgram-backend
     env_file: .env
     image: seno404star/backend_foodgram
     volumes:
       - static:/app/web
       - media:/app/media
     depends_on:
-      - frontend
       - db
     command: >
       /bin/bash -c "
@@ -30,12 +37,6 @@ services:
         gunicorn --bind 0.0.0.0:8000 backend_foodgram.wsgi
         python manage.py load_csv
       "
-  frontend:
-    env_file: .env
-    image: seno404star/frontend_foodgram
-    command: cp -r /app/build/. /frontend_static/
-    volumes:
-      - static:/app/frontend_static
   gateway:
     env_file: .env
     image: seno404star/gateway_foodgram
