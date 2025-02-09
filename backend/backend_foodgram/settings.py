@@ -144,4 +144,6 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
 
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://foodgram-my-best-food.run.place',
+]
