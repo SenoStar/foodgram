@@ -1,7 +1,4 @@
-[![Main Foodgram workflow](https://github.com/rodomir117/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/rodomir117/foodgram/actions/workflows/main.yml)
 # Проект: Foodgram
-### Выпускной проект *Яндекс.Практикум* курса Python-разработчик(backend)
-
 Проект Foodgram дает возможность пользователям создавать и хранить рецепты на онлайн-платформе. Кроме того, можно скачать список продуктов, необходимых для приготовления блюда, просмотреть рецепты друзей и добавить любимые рецепты в список избранных.
 
 
@@ -19,69 +16,47 @@
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
-### API документация
-
-[API документация](https://foodgram.ddnsking.com/redoc/)
-
-## Запуск проекта на удаленном сервере
-
-1. Установить docker compose на сервер:
+## Запуск проекта локально
+Клонировать репозиторий:
 ```bash
-sudo apt update
+git clone <https or SSH URL>
+```
+Перейти в директорию проекта
+```bash
+cd foodgram
+```
+или
+```bash
+cd foodgram-main
+```
+Создать .env:
+```bash
+touch .env
 ```
 ```bash
-sudo apt install curl
-```
-```bash
-curl -fSL https://get.docker.com -o get-docker.sh
-```
-```bash
-sudo sh ./get-docker.sh
-```
-```bash    
-sudo apt-get install docker-compose-plugin
-```
+# Django
+DEBUG=True
+SECRET_KEY=django-insecure--(htnx8z%fz_s2!!x-jse*gfjl^j46&t#1my96mbxg#0a947s%
+ALLOWED_HOSTS=127.0.0.1;localhost;<your_ip>;<your_domen_name>
 
-2. Скачать файл [docker-compose.production.yml](https://github.com/rodomir117/foodgram/blob/main/docker-compose.production.yml) на свой сервер.
-
-3. На сервере в директории с файлом **docker-compose.production.yml** создать файл  **.env**:
-``` bash    
-POSTGRES_DB=имя базы
-POSTGRES_USER=владелец базы
-POSTGRES_PASSWORD=пароль базы
+# DB
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=django
 DB_HOST=db
 DB_PORT=5432
-SECRET_KEY=ключ приложения django
-DEBUG=True/False
-ALLOWED_HOSTS=разрешенные хосты(your.domain.com)
-```        
-4. Запустить Docker compose:
-``` bash
-sudo docker compose -f docker-compose.production.yml up -d
-```
-5. На сервере настроить и запустить Nginx:
-- открыть файлы конфигурации
-    ``` bash
-    sudo nano /etc/nginx/sites-enabled/default
-    ```
-- внести изменения, заменив **<your.domain.com>** на свое доменное имя
-    ``` bash 
-    server {
-        listen 80;
-        server_name <your.domain.com>;
 
-        location / {
-            proxy_set_header Host $http_host;        
-            proxy_pass http://127.0.0.1:7070;
-            
-        }
-    }
-    ``` 
-- убедиться, что в файле конфигурации нет ошибок
-    ``` bash
-    sudo nginx -t
-    ```
-- перезагрузить конфигурацию
-    ``` bash
-    sudo service nginx reload
-    ```
+# SuperUser for admin zone
+ADMIN_USERNAME=admin
+ADMIN_EMAIL=admin@admin.admin
+ADMIN_PASSWORD=admin
+```
+Собрать контейнера:
+```bash
+docker compose -f docker-compose.yml up
+```
+Выполнить заполнение базы ингредиентами:
+```bash
+docker compose exec backend python manage.py load_csv
+```
+После успешного запуска, проект доступен по http://127.0.0.1:8000.
