@@ -10,4 +10,7 @@ LEN_256 = 256
 MIN_VALUE = 1
 
 # Validators
-pattern_username = r'^[\w.@+-]+\Z'
+PATTERN_USERNAME = r'^[\w.@+-]+\Z'
+
+# Data path
+INGREDIENTS_PATH = 'data/ingredients.csv'

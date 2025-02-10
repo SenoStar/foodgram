@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from .constants import (
@@ -131,7 +132,8 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления (в минутах)',
-        null=False
+        null=False,
+        validators=[MinValueValidator(1)]
     )
     author = models.ForeignKey(
         User,
@@ -139,11 +141,16 @@ class Recipe(models.Model):
         on_delete=models.CASCADE,
         related_name='authored_recipes'
     )
+    published_date = models.DateTimeField(
+        verbose_name='Дата публикации',
+        auto_now_add=True,
+        null=False
+    )
 
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ['-id']
+        ordering = ['-published_date']
 
     def __str__(self):
         return self.name
@@ -156,6 +163,7 @@ class Ingredient(models.Model):
         verbose_name='Название',
         max_length=LEN_128,
         db_index=True,
+        unique=True
     )
     measurement_unit = models.CharField(
         verbose_name='Единица измерения',
@@ -187,13 +195,20 @@ class RecipeIngredient(models.Model):
         related_name='recipe_ingredients',
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name='Количество'
+        verbose_name='Количество',
+        validators=[MinValueValidator(1)]
     )
 
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецептах'
         db_table = 'recipes_recipe_ingredient'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient'
+            )
+        ]
 
     def __str__(self):
         return f'{self.ingredient.name} {self.recipe.name}'
@@ -218,7 +233,7 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
-        ordering = ['id']
+        ordering = ['recipe__name']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],

@@ -1,23 +1,22 @@
 import csv
 
 from django.core.management.base import BaseCommand
+from recipes.constants import INGREDIENTS_PATH
 from recipes.models import Ingredient
 
 
 class Command(BaseCommand):
 
     help = 'Импортирует данные из CSV файлов'
+    count = 0
 
     def handle(self, *args, **options):
-        with open('data/ingredients.csv', 'r', encoding='utf-8') as file:
+        with open(INGREDIENTS_PATH, 'r', encoding='utf-8') as file:
             reader = csv.reader(file, delimiter=',')
-            ingredients = []
             for string in reader:
                 name, measurement_unit = string
                 if name:
-                    ingredient = Ingredient(
+                    Ingredient.objects.get_or_create(
                         name=name,
                         measurement_unit=measurement_unit
                     )
-                    ingredients.append(ingredient)
-            Ingredient.objects.bulk_create(ingredients)

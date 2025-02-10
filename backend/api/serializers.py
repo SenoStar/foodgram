@@ -1,4 +1,5 @@
 from drf_extra_fields.fields import Base64ImageField
+from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -215,24 +216,22 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         ingredients = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tags')
-
-        # Создаём рецепт без тегов и ингридиентов
-        recipe = Recipe.objects.create(author=request.user, **validated_data)
-
-        # Добавляем список id тегов
-        recipe.tags.set(tags)
-
-        # Добавляем списком ингридиенты
-        ingredient_list = [
-            RecipeIngredient(
-                recipe=recipe,
-                ingredient=Ingredient.objects.get(
-                    id=ingredient.get('id')
-                ),
-                amount=ingredient.get('amount'),
-            ) for ingredient in ingredients
-        ]
-        RecipeIngredient.objects.bulk_create(ingredient_list)
+        with transaction.atomic():
+            recipe = Recipe.objects.create(
+                author=request.user,
+                **validated_data
+            )
+            recipe.tags.set(tags)
+            ingredient_list = [
+                RecipeIngredient(
+                    recipe=recipe,
+                    ingredient=Ingredient.objects.get(
+                        id=ingredient.get('id')
+                    ),
+                    amount=ingredient.get('amount'),
+                ) for ingredient in ingredients
+            ]
+            RecipeIngredient.objects.bulk_create(ingredient_list)
         return recipe
 
     def update(self, instance, validated_data):
